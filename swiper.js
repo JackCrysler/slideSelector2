@@ -29,9 +29,6 @@ Swiper.prototype={
     moveTo:function(idx){
         this.wrap.style.top =  -idx*this.itemHeight +"px";
     },
-    callback:function(){
-        return false
-    },
     stopDefault:function (e) {
         e = e || window.event;
         if (e && e.preventDefault) {
@@ -53,7 +50,7 @@ Swiper.prototype={
         var startTime,endTime;
         var that =this;
         function _touchstart(e){
-
+            that.stopDefault(e);
             that.isTouched = !0;
             var computedStyle = window.getComputedStyle(that.wrap),
                 top = computedStyle.getPropertyValue("top");
@@ -79,11 +76,12 @@ Swiper.prototype={
         }
         function _touchend(e){
             that.stopDefault(e);
+            if(that._span == 0) return;
             that.isTouched = !1;
             endTime = new Date().getTime();
             that.timeSpan = endTime- startTime;
             var idx = that.index;
-            that.wrap.style.webkitTransition =  "margin-left .3s ease-in-out";
+            that.wrap.style.webkitTransition = "top .15s ease-in-out";
             var count = 1;
             function getIndex(c){
                 //to the right
@@ -105,6 +103,7 @@ Swiper.prototype={
             getIndex(count);
 
             that.index = idx;
+            that._span = 0; //重置移动距离
             that.moveTo(idx);
 
             that.callback && that.callback(idx);

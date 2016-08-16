@@ -108,8 +108,8 @@
     </div>
     <script src="swiper.js"></script>
     <script>
+        'use strict';
         var slideSelector = function(){
-
             this.init();
         };
         slideSelector.prototype = {
@@ -133,16 +133,6 @@
 
                 this.wrapper.addEventListener('click',function(e){
                     var ev = e || window.event, target = ev.target || ev.srcElement;
-                    if(target.tagName.toUpperCase() == "P"){
-                        var selectedData = target.getAttribute('data');
-                        var txt = target.innerHTML;
-                        that.data.callback({
-                            selected:selectedData,
-                            txt:txt
-                        });
-                        that.hide();
-                        return;
-                    }
                     if(target.className == 'slide-cancel'){
                         that.hide()
                     }
@@ -165,16 +155,15 @@
                 this.tpl = this.tpl.replace('{title}',_data.title).replace('{content}',str);
                 this.wrapper.innerHTML = this.tpl;
 
-
+                var that = this;
                 new Swiper('.slide-options',function(idx){
-                    console.log(idx)
+                    that.data.callback(idx);
                 });
 
             },
             hide:function(){
                 this.wrapper.className = this.wrapper.className.replace('slide-active','');
                 document.querySelector('.mask-layer').className=document.querySelector('.mask-layer').className.replace('show','');
-
             }
         };
 
@@ -188,13 +177,10 @@
                 data:['1409FE.D','1407D','ccc','aaa','vvv','1','2','3','4','5','6'],
                 callback:function(selected){
                     console.log(selected);
-
                     document.querySelector('.hit-me').innerHTML = selected.txt;
                 }
             });
         },false);
-
-
     </script>
 
 
