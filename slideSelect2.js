@@ -125,18 +125,20 @@ Swiper.prototype={
 
 
 var slideSelector = function(){
-    this.init();
+
 };
 slideSelector.prototype = {
     init:function(){
+
+        var parentDom = this.parentDom = document.querySelector('.container') || document.body;
 
         if(!document.querySelector('.slide-selector')){
             var _div = document.createElement('div');
             _div.className = 'slide-selector';
             this.wrapper = _div;
-            document.querySelector('.container').appendChild(_div);
+            parentDom.appendChild(_div);
         }else{
-            this.wrapper = document.querySelector('.slide-selector');
+            this.wrapper = parentDom.querySelector('.slide-selector');
         }
 
         this.bindEvent();
@@ -158,9 +160,15 @@ slideSelector.prototype = {
                     value: that.data.data[that.selectedIndex]
                 });
             }
+        },false);
+
+        this.wrapper.addEventListener(this.transitionEnd,function(){
+            if(that.wrapper.className.indexOf('slide-active') == -1) that.destroy();
         },false)
     },
     show:function(data){
+        this.init();
+
         this.data = data;
         this.render();
         this.wrapper.className = this.wrapper.className+' slide-active';
@@ -188,5 +196,27 @@ slideSelector.prototype = {
     hide:function(){
         this.wrapper.className = this.wrapper.className.replace('slide-active','');
         document.querySelector('.mask-layer').className=document.querySelector('.mask-layer').className.replace('show','');
+
+        
+    },
+    transitionEnd:function (){
+        var ele = document.createElement('bootstrap');
+        var obj = {
+            WebkitTransform : 'webkitTransitionEnd',
+            MozTransform : 'TransitionEnd',
+            MsTransform : 'msTransitionEnd',
+            OTransform : 'oTransitionEnd',
+            Transform : 'transitionEn'
+        };
+
+        for(var i in obj){
+            if(ele.style[i] !== undefined ){
+                return obj[i];
+            }
+        }
+
+    }(),
+    destroy:function(){
+        this.parentDom.removeChild(this.wrapper);
     }
 };
