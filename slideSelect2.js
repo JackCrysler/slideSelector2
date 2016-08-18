@@ -1,13 +1,15 @@
 
 'use strict';
-var Swiper = function(targetEle,callback){
+var Swiper = function(targetEle,callback,initIndex){
     this.wrap = document.querySelector(targetEle);
     if(!this.wrap)return;
+    this.init = initIndex || 0;
     this.items = this.wrap.querySelectorAll("p");
     this.len = this.items.length;
     this.itemHeight = this.items[0].offsetHeight;
     this.bindEvent();
     if(callback)this.callback = callback;
+    this.moveTo(initIndex);
 };
 Swiper.prototype={
     transitionEnd:function(){
@@ -129,7 +131,7 @@ var slideSelector = function(){
 };
 slideSelector.prototype = {
     init:function(){
-
+        this.selectedIndex = this.data.init || '0';
         var parentDom = this.parentDom = document.querySelector('.container') || document.body;
 
         if(!document.querySelector('.slide-selector')){
@@ -162,14 +164,12 @@ slideSelector.prototype = {
             }
         },false);
 
-        this.wrapper.addEventListener(this.transitionEnd,function(){
-            if(that.wrapper.className.indexOf('slide-active') == -1) that.destroy();
-        },false)
+
     },
     show:function(data){
+        this.data = data;
         this.init();
 
-        this.data = data;
         this.render();
         this.wrapper.className = this.wrapper.className+' slide-active';
         document.querySelector('.mask-layer').className
@@ -183,39 +183,34 @@ slideSelector.prototype = {
         str += '<p class="slide-option">&nbsp;</p><p class="slide-option">&nbsp;</p>';
         this.tpl = this.tpl.replace('{title}',_data.title).replace('{content}',str);
         this.wrapper.innerHTML = this.tpl;
+
+        //绑定swipe组件
         this.combineSwipe();
     },
     combineSwipe:function(){
         var that = this;
-        new Swiper('.slide-options',function(idx){
+        var swiper = new Swiper('.slide-options',function(idx){
             that.selectedIndex = idx;
-            that.data.callback(idx);
-        });
+            that.data.sCallback(idx);
+        },this.data.init);
+
+        //绑定隐藏事件，destroy dom
+        if(swiper.transitionEnd()){
+            this.wrapper.addEventListener(swiper.transitionEnd(),function(){
+                if(that.wrapper.className.indexOf('slide-active') == -1) that.destroy();
+            },false)
+
+        }else{
+            setTimeout(function(){
+                if(that.wrapper.className.indexOf('slide-active') == -1) that.destroy();
+            },300)
+        }
 
     },
     hide:function(){
         this.wrapper.className = this.wrapper.className.replace('slide-active','');
         document.querySelector('.mask-layer').className=document.querySelector('.mask-layer').className.replace('show','');
-
-        
     },
-    transitionEnd:function (){
-        var ele = document.createElement('bootstrap');
-        var obj = {
-            WebkitTransform : 'webkitTransitionEnd',
-            MozTransform : 'TransitionEnd',
-            MsTransform : 'msTransitionEnd',
-            OTransform : 'oTransitionEnd',
-            Transform : 'transitionEn'
-        };
-
-        for(var i in obj){
-            if(ele.style[i] !== undefined ){
-                return obj[i];
-            }
-        }
-
-    }(),
     destroy:function(){
         this.parentDom.removeChild(this.wrapper);
     }
