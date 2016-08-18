@@ -1,9 +1,10 @@
+
+'use strict';
 var Swiper = function(targetEle,callback){
     this.wrap = document.querySelector(targetEle);
     if(!this.wrap)return;
     this.items = this.wrap.querySelectorAll("p");
     this.len = this.items.length;
-    //this.setStyle();
     this.itemHeight = this.items[0].offsetHeight;
     this.bindEvent();
     if(callback)this.callback = callback;
@@ -119,5 +120,73 @@ Swiper.prototype={
     },
     removeTransition:function(){
         this.wrap.style.webkitTransition =  "";
+    }
+};
+
+
+var slideSelector = function(){
+    this.init();
+};
+slideSelector.prototype = {
+    init:function(){
+
+        if(!document.querySelector('.slide-selector')){
+            var _div = document.createElement('div');
+            _div.className = 'slide-selector';
+            this.wrapper = _div;
+            document.querySelector('.container').appendChild(_div);
+        }else{
+            this.wrapper = document.querySelector('.slide-selector');
+        }
+
+        this.bindEvent();
+    },
+    tpl: '<header class="slide-header"><div class="slide-title">{title}</div><span class="slide-cancel">取消</span><span class="slide-sure">确定</span></header>'+
+    '<div class="slide-wrapper"><div class="slide-mask"></div><div class="slide-options">{content}</div></div>',
+    bindEvent:function(){
+        var that = this;
+
+        this.wrapper.addEventListener('click',function(e){
+            var ev = e || window.event, target = ev.target || ev.srcElement;
+            if(target.className == 'slide-cancel'){
+                that.hide()
+            }
+            if(target.className == 'slide-sure'){
+                that.hide();
+                that.data.done({
+                    index: that.selectedIndex,
+                    value: that.data.data[that.selectedIndex]
+                });
+            }
+        },false)
+    },
+    show:function(data){
+        this.data = data;
+        this.render();
+        this.wrapper.className = this.wrapper.className+' slide-active';
+        document.querySelector('.mask-layer').className
+            = document.querySelector('.mask-layer').className+' show';
+    },
+    render:function(){
+        var _data = this.data, str='<p class="slide-option">&nbsp;</p><p class="slide-option">&nbsp;</p>';
+        _data.data.forEach(function(v,i){
+            str += '<p class="slide-option" data="'+i+'">'+v+'</p>';
+        });
+        str += '<p class="slide-option">&nbsp;</p><p class="slide-option">&nbsp;</p>';
+        this.tpl = this.tpl.replace('{title}',_data.title).replace('{content}',str);
+        this.wrapper.innerHTML = this.tpl;
+        this.combineSwipe();
+    },
+    combineSwipe:function(){
+        var that = this;
+        new Swiper('.slide-options',function(idx){
+            that.selectedIndex = idx;
+            that.data.callback(idx);
+        });
+
+    },
+    hide:function(){
+        this.wrapper.className = this.wrapper.className.replace('slide-active','');
+        document.querySelector('.mask-layer').className=document.querySelector('.mask-layer').className.replace('show','');
     }
 };
