@@ -86,7 +86,7 @@ Swiper.prototype={
             var idx = that.index;
             that.wrap.style.webkitTransition = "top .15s ease-in-out";
             var count = 1;
-            function getIndex(c){
+            function getIndex(c){console.log(c);
                 //to the right
                 if(that._span>0){
                     idx-=c;
@@ -98,11 +98,16 @@ Swiper.prototype={
                     if(idx>l)idx=l;
                 }
             }
+
+            if(that.timeSpan<260 && that.timeSpan>50){
+                //count = Math.ceil(Math.abs(that.timeSpan/10-12));
+                count = Math.ceil(Math.abs(that._span*that.timeSpan/2000));
+            } else
             if(Math.abs(that._span)>=that.itemHeight*0.5){
                 count = Math.ceil(Math.abs(that._span/that.itemHeight));
-            }else if(that.timeSpan<300 && that.timeSpan>120 && Math.abs(that._span)>that.itemHeight*0.3 ){
-                count = Math.ceil(Math.abs(that.timeSpan-120/10-12));
             }
+
+
             getIndex(count);
 
             that.index = idx;
