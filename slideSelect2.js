@@ -84,7 +84,7 @@ Swiper.prototype={
             endTime = new Date().getTime();
             that.timeSpan = endTime- startTime;
             var idx = that.index;
-            that.wrap.style.webkitTransition = "top .15s ease-in-out";
+            that.wrap.style.webkitTransition = "top .15s ease-out";
             var count = 1;
             function getIndex(c){console.log(c);
                 //to the right
