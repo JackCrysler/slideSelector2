@@ -1,4 +1,3 @@
-
 'use strict';
 var Swiper = function(targetEle,callback,initIndex){
     this.wrap = document.querySelector(targetEle);
@@ -52,7 +51,9 @@ Swiper.prototype={
         var l = this.len -5;
         var startTime,endTime;
         var that =this;
+        var isTouched = false;
         function _touchstart(e){
+            isTouched = true;
             that.stopDefault(e);
             that.isTouched = !0;
             var computedStyle = window.getComputedStyle(that.wrap),
@@ -61,14 +62,15 @@ Swiper.prototype={
             that.removeTransition();
             clearInterval(that.timer);
             startTime = new Date().getTime();
-            that.startPoint = e.touches[0].pageY;
-            that.startPointX = e.touches[0].pageX;
+            that.startPoint = e.touches?e.touches[0].pageY:e.y;
+            that.startPointX = e.touches?e.touches[0].pageX:e.x;
             that.currentSpan = parseFloat(top);
         }
         function _touchmove(e) {
+            if(!isTouched) return;
             that.stopDefault(e);
-            that.movePoint = e.touches[0].pageY;
-            that.movePointX = e.touches[0].pageX;
+            that.movePoint = e.touches?e.touches[0].pageY:e.y;
+            that.movePointX = e.touches?e.touches[0].pageX:e.x;
 
             that._span = that.movePoint-that.startPoint;
             that._spanX = that.movePointX-that.startPointX;
@@ -78,6 +80,7 @@ Swiper.prototype={
             this.style.top = that._span + that.currentSpan + "px";
         }
         function _touchend(e){
+            isTouched = false;
             that.stopDefault(e);
             if(that._span == 0) return;
             that.isTouched = !1;
@@ -118,8 +121,10 @@ Swiper.prototype={
         }
 
         this.wrap.addEventListener("touchstart",_touchstart,false);
+        this.wrap.addEventListener("mousedown",_touchstart,false);
         this.wrap.addEventListener("touchmove",_touchmove,false);
-        this.wrap.addEventListener("touchend",_touchend,false);
+        this.wrap.addEventListener("mousemove",_touchmove,false);
+        this.wrap.addEventListener("mouseup",_touchend,false);
         this.wrap.addEventListener(this.transitionEnd(),function(){
             that.removeTransition();
             that.currentSpan = parseFloat(this.style.top);
