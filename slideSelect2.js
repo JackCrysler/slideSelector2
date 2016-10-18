@@ -103,12 +103,13 @@ Swiper.prototype={
                 }
             }
 
-            if(that.timeSpan<260 && that.timeSpan>50){
-                //count = Math.ceil(Math.abs(that.timeSpan/10-12));
+            if(that.timeSpan<260 && that.timeSpan>50 && Math.abs(that._span)>100){
                 count = Math.ceil(Math.abs(that._span*that.timeSpan/2000));
             } else
             if(Math.abs(that._span)>=that.itemHeight*0.5){
                 count = Math.ceil(Math.abs(that._span/that.itemHeight));
+            }else{
+                count = 0;
             }
 
 
@@ -126,8 +127,13 @@ Swiper.prototype={
         this.wrap.addEventListener("mousedown",_touchstart,false);
         this.wrap.addEventListener("touchmove",_touchmove,false);
         this.wrap.addEventListener("mousemove",_touchmove,false);
+<<<<<<< HEAD
         this.wrap.addEventListener("mouseup",_touchend,false);
         this.wrap.addEventListener("touchend",_touchend,false);
+=======
+        document.documentElement.addEventListener("touchend",_touchend,false);
+        document.documentElement.addEventListener("mouseup",_touchend,false);
+>>>>>>> 045cc8bd09e197576b4f77f66e5121d254626953
         this.wrap.addEventListener(this.transitionEnd(),function(){
             that.removeTransition();
             that.currentSpan = parseFloat(this.style.top);
@@ -163,7 +169,7 @@ slideSelector.prototype = {
     bindEvent:function(){
         var that = this;
 
-        this.wrapper.addEventListener('click',function(e){
+        this.wrapper.addEventListener('touchend',function(e){
             var ev = e || window.event, target = ev.target || ev.srcElement;
             if(target.className == 'slide-cancel'){
                 that.hide()
