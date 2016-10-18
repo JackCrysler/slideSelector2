@@ -51,9 +51,8 @@ Swiper.prototype={
         var l = this.len -5;
         var startTime,endTime;
         var that =this;
-        var isTouched = false;
+
         function _touchstart(e){
-            isTouched = true;
             that.stopDefault(e);
             that.isTouched = !0;
             var computedStyle = window.getComputedStyle(that.wrap),
@@ -67,7 +66,7 @@ Swiper.prototype={
             that.currentSpan = parseFloat(top);
         }
         function _touchmove(e) {
-            if(!isTouched) return;
+            if(!that.isTouched) return;
             that.stopDefault(e);
             that.movePoint = e.touches?e.touches[0].pageY:e.y;
             that.movePointX = e.touches?e.touches[0].pageX:e.x;
@@ -80,9 +79,7 @@ Swiper.prototype={
             this.style.top = that._span + that.currentSpan + "px";
         }
         function _touchend(e){
-            isTouched = false;
 
-            that.stopDefault(e);
             if(that._span == 0) return;
             that.isTouched = !1;
             endTime = new Date().getTime();
@@ -90,7 +87,7 @@ Swiper.prototype={
             var idx = that.index;
             that.wrap.style.webkitTransition = "top .15s ease-out";
             var count = 1;
-            function getIndex(c){console.log(c);
+            function getIndex(c){
                 //to the right
                 if(that._span>0){
                     idx-=c;
@@ -104,7 +101,6 @@ Swiper.prototype={
             }
 
             if(that.timeSpan<260 && that.timeSpan>50){
-                //count = Math.ceil(Math.abs(that.timeSpan/10-12));
                 count = Math.ceil(Math.abs(that._span*that.timeSpan/2000));
             } else
             if(Math.abs(that._span)>=that.itemHeight*0.5){
@@ -122,12 +118,13 @@ Swiper.prototype={
             that.callback && that.callback(idx);
         }
 
+        var doc = document.documentElement;
         this.wrap.addEventListener("touchstart",_touchstart,false);
         this.wrap.addEventListener("mousedown",_touchstart,false);
         this.wrap.addEventListener("touchmove",_touchmove,false);
         this.wrap.addEventListener("mousemove",_touchmove,false);
-        this.wrap.addEventListener("mouseup",_touchend,false);
-        this.wrap.addEventListener("touchend",_touchend,false);
+        doc.addEventListener("mouseup",_touchend,false);
+        doc.addEventListener("touchend",_touchend,false);
         this.wrap.addEventListener(this.transitionEnd(),function(){
             that.removeTransition();
             that.currentSpan = parseFloat(this.style.top);
@@ -155,8 +152,6 @@ slideSelector.prototype = {
         }else{
             this.wrapper = parentDom.querySelector('.slide-selector');
         }
-
-        this.bindEvent();
     },
     tpl: '<header class="slide-header"><div class="slide-title">{title}</div><span class="slide-cancel">取消</span><span class="slide-sure">确定</span></header>'+
     '<div class="slide-wrapper"><div class="slide-mask"></div><div class="slide-options">{content}</div></div>',
@@ -164,6 +159,7 @@ slideSelector.prototype = {
         var that = this;
 
         this.wrapper.addEventListener('click',function(e){
+            e.stopPropagation();
             var ev = e || window.event, target = ev.target || ev.srcElement;
             if(target.className == 'slide-cancel'){
                 that.hide()
@@ -176,8 +172,6 @@ slideSelector.prototype = {
                 });
             }
         },false);
-
-
     },
     show:function(data){
         this.data = data;
@@ -187,6 +181,7 @@ slideSelector.prototype = {
         this.wrapper.className = this.wrapper.className+' slide-active';
         document.querySelector('.mask-layer').className
             = document.querySelector('.mask-layer').className+' show';
+        this.bindEvent();
     },
     render:function(){
         var _data = this.data, str='<p class="slide-option">&nbsp;</p><p class="slide-option">&nbsp;</p>';
@@ -194,8 +189,9 @@ slideSelector.prototype = {
             str += '<p class="slide-option" data="'+i+'">'+v+'</p>';
         });
         str += '<p class="slide-option">&nbsp;</p><p class="slide-option">&nbsp;</p>';
-        this.tpl = this.tpl.replace('{title}',_data.title).replace('{content}',str);
-        this.wrapper.innerHTML = this.tpl;
+        var template = this.tpl;
+        template = template.replace('{title}',_data.title).replace('{content}',str);
+        this.wrapper.innerHTML = template;
 
         //绑定swipe组件
         this.combineSwipe();

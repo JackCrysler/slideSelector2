@@ -56,7 +56,9 @@
         .slide-options{
             position: absolute;
             width: 100%;
+
             text-align: center;
+            overflow: hidden;
         }
         .slide-active{
             transform: translate3d(0,0,0);
@@ -101,6 +103,10 @@
         }
         .slide-option{
             height: 45px;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
             line-height: 45px;
             text-indent: .8rem;
         }
@@ -109,6 +115,8 @@
 <body>
     <div class="container">
         <div class="hit-me">点我</div>
+        <br>
+        <div class="hit-else">也可以点我</div>
 
         <div class="mask-layer"></div>
 
@@ -120,8 +128,8 @@
         var ss = new slideSelector();
         document.querySelector('.hit-me').addEventListener('click',function(){
             ss.show({
-                title:'information',
-                init: 0,
+                title:'虞美人·李煜',
+                init: 3,
                 data:['春花秋月何时了','往事知多少','小楼昨夜又东风','故国不堪回首明月中','雕栏玉砌应犹在',"只是朱颜改","问君能有几多愁","恰似一江春水向东流","虞美人*李煜"],
                 afterSwipe:function(selected){
                     //console.log(selected);
@@ -129,6 +137,34 @@
                 done:function(data){
                     console.log(data);
                     document.querySelector('.hit-me').innerHTML = data.value;
+                }
+            });
+        },false);
+
+        document.querySelector('.hit-else').addEventListener('click',function(){
+            ss.show({
+                title:'《乐府·将进酒》',
+                init: 3,
+                data:['君不见，黄河之水天上来，奔流到海不复回',
+                    '君不见，高堂明镜悲白发，朝如青丝暮成雪',
+                    '人生得意须尽欢，莫使金樽空对月',
+                    '天生我材必有用，千金散尽还复来',
+                    '烹羊宰牛且为乐，会须一饮三百杯',
+                    "岑夫子，丹丘生，将进酒，杯莫停",
+                    "与君歌一曲，请君为我倾耳听",
+                    "钟鼓馔玉不足贵，但愿长醉不复醒",
+                    "古来圣贤皆寂寞，惟有饮者留其名",
+                    "陈王昔时宴平乐，斗酒十千恣欢谑",
+                    "主人何为言少钱，径须沽取对君酌",
+                    "五花马，千金裘，呼儿将出换美酒",
+                    "与尔同销万古愁"
+                ],
+                afterSwipe:function(selected){
+                    //console.log(selected);
+                },
+                done:function(data){
+                    console.log(data);
+                    document.querySelector('.hit-else').innerHTML = data.value;
                 }
             });
         },false);
