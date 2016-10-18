@@ -204,7 +204,7 @@ slideSelector.prototype = {
         var that = this;
         var swiper = new Swiper('.slide-options',function(idx){
             that.selectedIndex = idx;
-            that.data.sCallback(idx);
+            that.data.afterSwipe(idx);
         },this.data.init);
 
         //绑定隐藏事件，destroy dom
