@@ -45,7 +45,7 @@ Swiper.prototype={
     },
     bindEvent:function(){
         this.currentSpan = 0;
-        this.index = 0;
+        this.index = this.startIndex || 0;
         this.timeSpan = 0;
         this.isTouched = false;
         var l = this.len -5;
@@ -55,7 +55,7 @@ Swiper.prototype={
         function _touchstart(e){
             that.stopDefault(e);
             that.isTouched = !0;
-            var computedStyle = window.getComputedStyle(that.wrap),
+            var computedStyle = getComputedStyle(that.wrap),
                 top = computedStyle.getPropertyValue("top");
             this.style.top = top;
             that.removeTransition();
@@ -88,12 +88,12 @@ Swiper.prototype={
             that.wrap.style.webkitTransition = "top .15s ease-out";
             var count = 1;
             function getIndex(c){
-                //to the right
+                //down
                 if(that._span>0){
                     idx-=c;
                     if(idx<0)idx=0;
                 }
-                //to the left
+                //up
                 if(that._span<0){
                     idx+=c;
                     if(idx>l)idx=l;
@@ -137,28 +137,33 @@ Swiper.prototype={
 
 
 var slideSelector = function(){
+    this.selectedIndex = -1;
+    var parentDom = this.parentDom = document.querySelector('.container') || document.body;
 
+    if(!document.querySelector('.slide-selector')){
+        var _div = document.createElement('div');
+        _div.className = 'slide-selector';
+        this.wrapper = _div;
+        parentDom.appendChild(_div);
+    }else{
+        this.wrapper = parentDom.querySelector('.slide-selector');
+    }
+    this.mask = document.querySelector('.mask-layer');
+    this.mask.onclick = function () {
+
+        this.hide();
+    }.bind(this)
 };
 slideSelector.prototype = {
     init:function(){
-        this.selectedIndex = this.data.startIndex || '0';
-        var parentDom = this.parentDom = document.querySelector('.container') || document.body;
-
-        if(!document.querySelector('.slide-selector')){
-            var _div = document.createElement('div');
-            _div.className = 'slide-selector';
-            this.wrapper = _div;
-            parentDom.appendChild(_div);
-        }else{
-            this.wrapper = parentDom.querySelector('.slide-selector');
-        }
+        if(this.selectedIndex==-1) this.selectedIndex = this.data.startIndex || 0;
     },
     tpl: '<header class="slide-header"><div class="slide-title">{title}</div><span class="slide-cancel">取消</span><span class="slide-sure">确定</span></header>'+
     '<div class="slide-wrapper"><div class="slide-mask"></div><div class="slide-options">{content}</div></div>',
     bindEvent:function(){
         var that = this;
 
-        this.wrapper.addEventListener('click',function(e){
+        this.wrapper.onclick = function(e){
             e.stopPropagation();
             var ev = e || window.event, target = ev.target || ev.srcElement;
             if(target.className == 'slide-cancel'){
@@ -171,16 +176,21 @@ slideSelector.prototype = {
                     value: that.data.data[that.selectedIndex]
                 });
             }
-        },false);
+        };
+
+
     },
     show:function(data){
         this.data = data;
         this.init();
 
         this.render();
-        this.wrapper.className = this.wrapper.className+' slide-active';
-        document.querySelector('.mask-layer').className
-            = document.querySelector('.mask-layer').className+' show';
+        document.querySelector('.mask-layer').className +=' show';
+        setTimeout(function(){
+            this.wrapper.className = this.wrapper.className+' slide-active';
+        }.bind(this),30);
+
+
         this.bindEvent();
     },
     render:function(){
@@ -201,7 +211,7 @@ slideSelector.prototype = {
         var swiper = new Swiper('.slide-options',function(idx){
             that.selectedIndex = idx;
             that.data.afterSwipe(idx);
-        },this.data.startIndex);
+        },this.selectedIndex);
 
         //绑定隐藏事件，destroy dom
         if(swiper.transitionEnd()){
@@ -218,9 +228,10 @@ slideSelector.prototype = {
     },
     hide:function(){
         this.wrapper.className = this.wrapper.className.replace('slide-active','');
-        document.querySelector('.mask-layer').className=document.querySelector('.mask-layer').className.replace('show','');
+        this.mask.className=this.mask.className.replace('show','');
     },
     destroy:function(){
-        this.parentDom.removeChild(this.wrapper);
+        this.wrapper.innerHTML = "";
+        this.wrapper.onclick = null;
     }
 };
