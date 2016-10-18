@@ -81,6 +81,7 @@ Swiper.prototype={
         }
         function _touchend(e){
             isTouched = false;
+
             that.stopDefault(e);
             if(that._span == 0) return;
             that.isTouched = !1;
@@ -115,6 +116,7 @@ Swiper.prototype={
 
             that.index = idx;
             that._span = 0; //重置移动距离
+            console.log(idx);
             that.moveTo(idx);
 
             that.callback && that.callback(idx);
@@ -125,6 +127,7 @@ Swiper.prototype={
         this.wrap.addEventListener("touchmove",_touchmove,false);
         this.wrap.addEventListener("mousemove",_touchmove,false);
         this.wrap.addEventListener("mouseup",_touchend,false);
+        this.wrap.addEventListener("touchend",_touchend,false);
         this.wrap.addEventListener(this.transitionEnd(),function(){
             that.removeTransition();
             that.currentSpan = parseFloat(this.style.top);
