@@ -2,7 +2,7 @@
 var Swiper = function(targetEle,callback,initIndex){
     this.wrap = document.querySelector(targetEle);
     if(!this.wrap)return;
-    this.init = initIndex || 0;
+    this.startIndex = initIndex || 0;
     this.items = this.wrap.querySelectorAll("p");
     this.len = this.items.length;
     this.itemHeight = this.items[0].offsetHeight;
@@ -144,7 +144,7 @@ var slideSelector = function(){
 };
 slideSelector.prototype = {
     init:function(){
-        this.selectedIndex = this.data.init || '0';
+        this.selectedIndex = this.data.startIndex || '0';
         var parentDom = this.parentDom = document.querySelector('.container') || document.body;
 
         if(!document.querySelector('.slide-selector')){
@@ -205,7 +205,7 @@ slideSelector.prototype = {
         var swiper = new Swiper('.slide-options',function(idx){
             that.selectedIndex = idx;
             that.data.afterSwipe(idx);
-        },this.data.init);
+        },this.data.startIndex);
 
         //绑定隐藏事件，destroy dom
         if(swiper.transitionEnd()){
