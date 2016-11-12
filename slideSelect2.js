@@ -238,7 +238,7 @@ slideSelector.prototype = {
         this.data = this.subClass(data,this.defaults);
         //缓存title，解决多个show()之间selectedIndex耦合的问题
         var rt = this.data.title;
-        if(!this.titles[rt]) this.titles[rt] = 0;
+        if(!this.titles[rt]) this.titles[rt] = this.data.startIndex || 0;
         //初始化dom
         this.init();
         //渲染options

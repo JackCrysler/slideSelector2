@@ -119,8 +119,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="hit-me">点我</div>
         <br>
+        <div class="hit-me">点我</div>
         <br>
         <div class="hit-else">也可以点我</div>
     </div>
@@ -128,15 +128,11 @@
     <script src="slideSelect2.js"></script>
     <script>
 
-        var ss = new slideSelector();
+        var ss = new slideSelector();//实例化
+
         document.querySelector('.hit-me').addEventListener('click',function(){
             ss.show({
-                title:'虞美人·李煜',
-                startIndex: 3,
                 data:['春花秋月何时了','往事知多少','小楼昨夜又东风','故国不堪回首明月中','雕栏玉砌应犹在',"只是朱颜改","问君能有几多愁","恰似一江春水向东流","虞美人*李煜"],
-                afterSwipe:function(selected){
-                    //console.log(selected);
-                },
                 done:function(data){
                     console.log(data);
                     document.querySelector('.hit-me').innerHTML = data.value;
