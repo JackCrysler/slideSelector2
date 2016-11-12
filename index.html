@@ -29,6 +29,9 @@
         .show{
             display: block !important;
         }
+        .hide{
+            display: none !important;
+        }
         .mask-layer{
             position: absolute;
             top: 0;
@@ -37,6 +40,7 @@
             height: 100%;
             background: rgba(0,0,0,.7);
             display: none;
+            z-index: 99998;
         }
         .slide-selector{
             position: absolute;
@@ -47,6 +51,7 @@
             background: #fff;
             transform: translate3d(0,100%,0);
             transition: transform .3s ease-in-out;
+            z-index: 99999;
         }
         .slide-wrapper{
             position: relative;
@@ -65,7 +70,7 @@
         }
         .slide-mask{
             position: absolute;
-            z-index: 11002;
+            z-index: 1;
             top: 0;
             left: 0;
             width: 100%;
@@ -116,10 +121,8 @@
     <div class="container">
         <div class="hit-me">点我</div>
         <br>
+        <br>
         <div class="hit-else">也可以点我</div>
-
-        <div class="mask-layer"></div>
-
     </div>
 
     <script src="slideSelect2.js"></script>
