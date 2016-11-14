@@ -114,7 +114,7 @@ Swiper.prototype = {
 
             that.index = idx;
             that._span = 0; //重置移动距离
-            console.log(idx);
+            //console.log(idx);
             that.moveTo(idx);
 
             that.callback && that.callback(idx);
@@ -158,24 +158,23 @@ var slideSelector = function (target) {
         :
         document.querySelector('.mask-layer');
 
-
     this.defaults = {//默认配置相
         title: '标题',
         data: [1, 2, 3, 4, 5, 6, 7, 8, 9],//需要渲染的数据
         done: function (selected) {//点击确定的回调
-            console.log(selected)
+            //console.log(selected)
         },
         afterSwipe: function (current) {//每次滑动结束的回调
-            console.log(current)
+            //console.log(current)
         },
         startIndex: 0
-    }
+    };
     this.selectedIndex = -1;
     this.titles = {};
 
     this.mask.addEventListener('click', function () {
         this.hide();
-    }.bind(this), false)
+    }.bind(this), false);
 
     this.parentDom = parentDom;
 };
@@ -195,7 +194,7 @@ slideSelector.prototype = {
             }else{
                 Class[name] = clone(defaults[name])
             }
-        };
+        }
         function clone(obj) {
             var o;
             if(typeof obj == "object"){
@@ -218,7 +217,7 @@ slideSelector.prototype = {
                 o = obj;
             }
             return o;
-        };
+        }
         return Class;
     },
     createDom:function (wrap,cls) {
@@ -269,7 +268,8 @@ slideSelector.prototype = {
     combineSwipe: function () {
         var that = this;
         //获取缓存titles中的initIndex
-        var ct = this.data.title,initIndex = this.titles[ct];
+        var ct = this.data.title,
+            initIndex = this.selectedIndex==-1?this.titles[ct]:this.selectedIndex;
         this.swiper = new Swiper('.slide-options', function (idx) {
             that.titles[ct] = idx;
             that.selectedIndex = idx;
