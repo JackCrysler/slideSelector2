@@ -53,7 +53,6 @@ Swiper.prototype = {
         var that = this;
 
         function _touchstart(e) {
-            that.stopDefault(e);
             that.isTouched = !0;
             var computedStyle = getComputedStyle(that.wrap),
                 top = computedStyle.getPropertyValue("top");
@@ -61,76 +60,81 @@ Swiper.prototype = {
             that.removeTransition();
             clearInterval(that.timer);
             startTime = new Date().getTime();
-            that.startPoint = e.touches ? e.touches[0].pageY : e.y;
+            that.startPointY = e.touches ? e.touches[0].pageY : e.y;
             that.startPointX = e.touches ? e.touches[0].pageX : e.x;
             that.currentSpan = parseFloat(top);
         }
 
         function _touchmove(e) {
-            if (!that.isTouched) return;
             that.stopDefault(e);
-            that.movePoint = e.touches ? e.touches[0].pageY : e.y;
+            if (!that.isTouched) return;
+
+            that.movePointY = e.touches ? e.touches[0].pageY : e.y;
             that.movePointX = e.touches ? e.touches[0].pageX : e.x;
 
-            that._span = that.movePoint - that.startPoint;
+            that._spanY = that.movePointY - that.startPointY;
             that._spanX = that.movePointX - that.startPointX;
-            if (Math.abs(that._spanX) - Math.abs(that._span) > 0) {
+
+            if (Math.abs(that._spanX) - Math.abs(that._spanY) > 0) {
                 return;//上下滑动幅度比左右滑动幅度大，阻止页面切换
             }
-            this.style.top = that._span + that.currentSpan + "px";
+
+            this.style.top = that._spanY + that.currentSpan + "px";
         }
 
         function _touchend(e) {
-
-            if (that._span == 0) return;
             that.isTouched = !1;
             endTime = new Date().getTime();
             that.timeSpan = endTime - startTime;
-            var idx = that.index;
-            that.wrap.style.webkitTransition = "top .15s ease-out";
+            //根据手势计算滑动的距离，返回一个数值，越大表示滑动的越多
             var count = 1;
+            if (that.timeSpan < 260 && that.timeSpan > 50) {
+                count = Math.ceil(Math.abs(that._spanY * that.timeSpan / 2000));
+            } else if (Math.abs(that._spanY) >= that.itemHeight * 0.5) {
+                count = Math.ceil(Math.abs(that._spanY / that.itemHeight));
+            }
 
+            //根据上下滑动，重新计算索引
+            var idx = that.index;//获取之前的索引，以便后续的操作都是在之前的索引基础上进行
             function getIndex(c) {
                 //down
-                if (that._span > 0) {
+                if (that._spanY > 0) {
                     idx -= c;
                     if (idx < 0)idx = 0;
                 }
                 //up
-                if (that._span < 0) {
+                if (that._spanY < 0) {
                     idx += c;
                     if (idx > l)idx = l;
                 }
             }
-
-            if (that.timeSpan < 260 && that.timeSpan > 50) {
-                count = Math.ceil(Math.abs(that._span * that.timeSpan / 2000));
-            } else if (Math.abs(that._span) >= that.itemHeight * 0.5) {
-                count = Math.ceil(Math.abs(that._span / that.itemHeight));
-            }
-
-
             getIndex(count);
 
-            that.index = idx;
-            that._span = 0; //重置移动距离
-            //console.log(idx);
+            that.index = idx;//更新计算出来的索引
+            that._spanY = 0; //重置移动距离
+            //添加过渡效果
+            that.addTransition();
+            //根据索引移动到目标位置
             that.moveTo(idx);
-
+            //触发回调，返回索引
             that.callback && that.callback(idx);
         }
 
-        var doc = document.documentElement;
         this.wrap.addEventListener("touchstart", _touchstart, false);
         this.wrap.addEventListener("mousedown", _touchstart, false);
         this.wrap.addEventListener("touchmove", _touchmove, false);
         this.wrap.addEventListener("mousemove", _touchmove, false);
+        var doc = document.documentElement;
         doc.addEventListener("mouseup", _touchend, false);
         doc.addEventListener("touchend", _touchend, false);
+
         this.wrap.addEventListener(this.transitionEnd(), function () {
             that.removeTransition();
             that.currentSpan = parseFloat(this.style.top);
         }, false);
+    },
+    addTransition:function () {
+        this.wrap.style.webkitTransition = "top .15s ease-out";
     },
     removeTransition: function () {
         this.wrap.style.webkitTransition = "";
@@ -169,7 +173,7 @@ var slideSelector = function (target) {
         },
         startIndex: 0
     };
-    this.selectedIndex = -1;
+
     this.titles = {};
 
     this.mask.addEventListener('click', function () {
@@ -180,8 +184,9 @@ var slideSelector = function (target) {
 };
 slideSelector.prototype = {
     init: function () {
+        this.parentDom.style.cssText = 'width: 100%;height: 100%;overflow: hidden;';
         this.wrapper.className = this.wrapper.className.replace(' hide','');
-        if (this.selectedIndex == -1) this.selectedIndex = this.data.startIndex || 0;
+        this.selectedIndex = this.data.startIndex || 0;
     },
     trim: function (str) {
         return str.replace(/(^\s+|\s+$)/, '');
@@ -237,7 +242,7 @@ slideSelector.prototype = {
         this.data = this.subClass(data,this.defaults);
         //缓存title，解决多个show()之间selectedIndex耦合的问题
         var rt = this.data.title;
-        if(!this.titles[rt]) this.titles[rt] = this.data.startIndex || 0;
+        if(this.titles[rt]==undefined) this.titles[rt] = this.data.startIndex || 0;
         //初始化dom
         this.init();
         //渲染options
@@ -269,9 +274,11 @@ slideSelector.prototype = {
         var that = this;
         //获取缓存titles中的initIndex
         var ct = this.data.title,
-            initIndex = this.selectedIndex==-1?this.titles[ct]:this.selectedIndex;
+            initIndex = this.titles[ct];
+        console.log(ct+':'+initIndex)
         this.swiper = new Swiper('.slide-options', function (idx) {
             that.titles[ct] = idx;
+
             that.selectedIndex = idx;
             !!that.data.afterSwipe && that.data.afterSwipe(idx);
         }, initIndex);
@@ -313,6 +320,7 @@ slideSelector.prototype = {
     hide: function () {
         this.wrapper.className = this.wrapper.className.replace(' slide-active', '');
         this.mask.className = this.mask.className.replace(' show', '');
+        this.parentDom.style = '';
     },
     destroy: function () {
         this.wrapper.innerHTML = "";
