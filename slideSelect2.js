@@ -1,4 +1,12 @@
 'use strict';
+/*
+*
+*
+*
+*
+*
+*
+*/
 var Swiper = function (targetEle, callback, initIndex) {
     this.wrap = document.querySelector(targetEle);
     if (!this.wrap)return;
@@ -143,25 +151,6 @@ Swiper.prototype = {
 
 
 var slideSelector = function (target) {
-    var parentDom;
-    if (!target) {
-        parentDom = document.querySelector('.container') || document.body;
-    } else {
-        parentDom = typeof target == 'string' ? document.querySelector(target) : target;
-    }
-
-    this.wrapper = !parentDom.querySelector('.slide-selector')
-        ?
-        this.createDom(parentDom,'slide-selector')
-        :
-        parentDom.querySelector('.slide-selector');
-
-    this.mask = !parentDom.querySelector('.mask-layer')
-        ?
-        this.createDom(parentDom,'mask-layer')
-        :
-        document.querySelector('.mask-layer');
-
     this.defaults = {//默认配置相
         title: '标题',
         data: [1, 2, 3, 4, 5, 6, 7, 8, 9],//需要渲染的数据
@@ -171,18 +160,39 @@ var slideSelector = function (target) {
         afterSwipe: function (current) {//每次滑动结束的回调
             //console.log(current)
         },
-        startIndex: 0
+        startIndex: 0,
+        type:'multiple'
     };
+
+    this.initDom(target);
 
     this.titles = {};
 
     this.mask.addEventListener('click', function () {
         this.hide();
     }.bind(this), false);
-
-    this.parentDom = parentDom;
 };
 slideSelector.prototype = {
+    initDom:function (target) {
+        var parentDom;
+        if (!target) {
+            parentDom = document.querySelector('.container') || document.body;
+        } else {
+            parentDom = typeof target == 'string' ? document.querySelector(target) : target;
+        }
+        this.parentDom = parentDom;
+        this.wrapper = !parentDom.querySelector('.slide-selector')
+            ?
+            this.createDom(parentDom,'slide-selector')
+            :
+            parentDom.querySelector('.slide-selector');
+
+        this.mask = !parentDom.querySelector('.mask-layer')
+            ?
+            this.createDom(parentDom,'mask-layer')
+            :
+            document.querySelector('.mask-layer');
+    },
     init: function () {
         this.parentDom.style.cssText = 'width: 100%;height: 100%;overflow: hidden;';
         this.wrapper.className = this.wrapper.className.replace(' hide','');
@@ -231,14 +241,15 @@ slideSelector.prototype = {
         wrap.appendChild(_div);
         return _div;
     },
-    tpl: '<header class="slide-header">' +
-    '<div class="slide-title">{title}</div><span class="slide-cancel">取消</span><span class="slide-sure">确定</span>' +
-    '</header>' +
-    '<div class="slide-wrapper"><div class="slide-mask"></div>' +
-    '<div class="slide-options">{content}</div>' +
-    '</div>',
+    tpl: '<header class="slide-header">'
+            +'<div class="slide-title">{title}</div><span class="slide-cancel">取消</span><span class="slide-sure">确定</span>'
+        +'</header>'
+        +'<div class="slide-wrapper">'
+            +'<div class="slide-mask"></div>'
+            +'<div class="slide-options s-options-1">{content}</div>'
+        +'</div>',
     show: function (data) {
-        //收集入参，整合默认设置，入参有使用入参，入参无使用默认
+        //收集入参，整合默认设置，入参有使用入参，入参无使用默认(深拷贝)
         this.data = this.subClass(data,this.defaults);
         //缓存title，解决多个show()之间selectedIndex耦合的问题
         var rt = this.data.title;
@@ -273,19 +284,16 @@ slideSelector.prototype = {
     combineSwipe: function () {
         var that = this;
         //获取缓存titles中的initIndex
-        var ct = this.data.title,
-            initIndex = this.titles[ct];
-        console.log(ct+':'+initIndex)
+        var ct = this.data.title, initIndex = this.titles[ct];
+        console.log(ct+':'+initIndex);
         this.swiper = new Swiper('.slide-options', function (idx) {
             that.titles[ct] = idx;
-
             that.selectedIndex = idx;
             !!that.data.afterSwipe && that.data.afterSwipe(idx);
         }, initIndex);
     },
     bindEvent: function () {
         var that = this;
-
         this.wrapper.onclick = function (e) {
             e.stopPropagation();
             var ev = e || window.event, target = ev.target || ev.srcElement;
@@ -303,9 +311,9 @@ slideSelector.prototype = {
         };
 
         //绑定隐藏事件，destroy dom
-        var swipe = this.swiper, that = this;
+        var swipe = this.swiper;
         if (swipe) {
-            if(that.wrapper.getAttribute('listening')) return;
+            if(this.wrapper.getAttribute('listening')) return;
             this.wrapper.addEventListener(swipe.transitionEnd(), _destroy, false)
         } else {
             //setTimeout(_destroy, 300)
@@ -320,9 +328,9 @@ slideSelector.prototype = {
     hide: function () {
         this.wrapper.className = this.wrapper.className.replace(' slide-active', '');
         this.mask.className = this.mask.className.replace(' show', '');
-        this.parentDom.style = '';
     },
     destroy: function () {
+        this.parentDom.removeAttribute('style');
         this.wrapper.innerHTML = "";
         this.wrapper.className+= ' hide';
         this.wrapper.onclick = null;
